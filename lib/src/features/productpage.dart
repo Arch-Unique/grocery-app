@@ -26,10 +26,13 @@ class _ProductPageState extends State<ProductPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              UniversalImage(
-                "",
-                height: Ui.width(context) / 3,
-                width: Ui.width(context) / 3,
+              Align(
+                alignment: Alignment.center,
+                child: UniversalImage(
+                  widget.product.image,
+                  height: Ui.width(context) / 3,
+                  width: Ui.width(context) / 3,
+                ),
               ),
               Ui.boxHeight(24),
               AppText.bold(
@@ -43,7 +46,9 @@ class _ProductPageState extends State<ProductPage> {
               Ui.boxHeight(8),
               AppText.bold(widget.product.price.toCurrency()),
               Ui.boxHeight(8),
-              CartButton(widget.product)
+              Align(
+                alignment: Alignment.center,
+                child: CartButton(widget.product))
             ],
           ),
         ),

@@ -1,7 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:grocery_app/src/features/app_controller.dart';
+import 'package:grocery_app/src/features/cartpage.dart';
+import 'package:grocery_app/src/features/productpage.dart';
 import 'package:grocery_app/src/global/services/app_service.dart';
 import 'package:grocery_app/src/global/ui/ui_barrel.dart';
 import 'package:grocery_app/src/global/ui/widgets/others/containers.dart';
@@ -16,31 +20,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final controller = Get.find<AppController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: SizedBox(
+          height: Ui.height(context),
           child: Ui.padding(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppHeader(),
+                Ui.boxHeight(24),
                 AppText.bold("Our Products", fontSize: 24),
                 Ui.boxHeight(16),
                 Expanded(
                     child: GridView.count(
                   crossAxisCount: 2,
-                  childAspectRatio: 1.5,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: ((Ui.width(context)-64)/2)/240,
                   children: List.generate(
-                      10,
-                      (index) => ProductCard(Product(
-                          id: index.toString(),
-                          name: "Product $index",
-                          description: "Description $index",
-                          qty: "$index kg",
-                          image: "",
-                          price: index * 200))),
+                      controller.products.length,
+                      (index) => ProductCard(controller.products[index])),
                 ))
               ],
             ),
@@ -59,33 +62,49 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
-      padding: EdgeInsets.all(16),
+      border: Border.all(color: AppColors.textFieldColor,strokeAlign: BorderSide.strokeAlignOutside),
+      onPressed: (){
+        Get.to(ProductPage(product));
+      },
+      radius: 16,
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Image
-            UniversalImage(
-              product.image,
-              height: 120,
-              width: 120,
-              fit: BoxFit.cover,
+            Container(
+              color: AppColors.white,
+              padding: EdgeInsets.all(4),
+              child: Ui.align(
+              align: Alignment.center,
+              child: UniversalImage(
+                product.image,
+                height: 120,
+                width: 120,
+                fit: BoxFit.cover,
+              ),
             ),
-
-            Ui.boxHeight(16),
-            // Name
-            AppText.bold(product.name),
-            Ui.boxHeight(8),
-            AppText.thin(product.qty, fontSize: 10),
-            Ui.boxHeight(8),
-            Row(
-              children: [
-                AppText.bold(product.price.toCurrency(), fontSize: 14),
-                const Spacer(),
-                CartButton(product)
-              ],
-            )
-          ]),
+            ),
+            // Image
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+              
+              // Name
+              AppText.bold(product.name),
+              AppText.thin(product.qty, fontSize: 12),
+              Ui.boxHeight(8),
+              Row(
+                children: [
+                  AppText.bold(product.price.toCurrency(), fontSize: 14),
+                  const Spacer(),
+                  CartButton(product)
+                ],
+              )
+                        ]),
+            ),]),
     );
   }
 }
@@ -112,24 +131,25 @@ class AppHeader extends StatelessWidget {
           ),
         ),
         IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Get.to(CartPage());
+            },
             icon: Stack(
               children: [
-                AppIcon(Iconsax.shopping_cart),
+                AppIcon(Icons.shopping_cart_checkout_rounded),
                 Positioned(
                     child: Obx(() {
                       return AppText.thin(
                         controller.cart.length.toString(),
                         color: AppColors.red,
-                        fontSize: 8,
+                        fontSize: 12,
                       );
                     }),
                     bottom: 0,
                     right: 0)
               ],
             )),
-        Ui.boxWidth(24),
-        IconButton(onPressed: () {}, icon: AppIcon(Iconsax.search_normal)),
+        IconButton(onPressed: () {}, icon: AppIcon(Icons.search_rounded)),
       ],
     );
   }
@@ -145,32 +165,36 @@ class CartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => controller.cart.contains(product)
-        ? AppButton.outline(() {
+        ? counterwidget() :  InkWell(
+          onTap:  () {
             controller.addToCart(product);
-          }, "ADD")
-        : counterwidget());
+          },
+          child: AppText.bold("ADD"),));
   }
 
   counterwidget() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-            onPressed: () {
-              product.cartQty.value += 1;
-            },
-            icon: AppIcon(Iconsax.add)),
-        Ui.padding(child: Obx(() {
-          return AppText.thin(product.cartQty.value.toString());
-        })),
-        IconButton(
-            onPressed: () {
+       GestureDetector(
+            onTap: () {
               product.cartQty.value -= 1;
               if (product.cartQty.value == 0) {
                 controller.removeFromCart(product);
               }
             },
-            icon: AppIcon(Iconsax.minus)),
+            child: AppIcon(Iconsax.minus)),
+        Ui.padding(
+          padding: 4,
+          child: Obx(() {
+          return AppText.thin(product.cartQty.value.toString());
+        })),
+         GestureDetector(
+            onTap: () {
+              product.cartQty.value += 1;
+            },
+            child: AppIcon(Iconsax.add)),
+        
       ],
     );
   }

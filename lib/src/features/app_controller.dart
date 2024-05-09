@@ -5,12 +5,21 @@ import 'package:grocery_app/src/global/views/pages.dart';
 import 'package:grocery_app/src/src_barrel.dart';
 
 import '../global/services/barrel.dart';
+import 'homepage.dart';
 
 class AppController extends GetxController {
   RxList<TextEditingController> tecs =
       List.generate(4, (index) => TextEditingController()).obs;
 
-  RxList<Product> products = <Product>[].obs;
+  RxList<Product> products = List.generate(
+                      10,
+                      (index) => Product(
+                          id: index.toString(),
+                          name: "Product $index",
+                          description: "Description $index",
+                          qty: "$index kg",
+                          image: Assets.ss1,
+                          price: index * 200)).obs;
   RxList<Product> cart = <Product>[].obs;
 
   final appService = Get.find<AppService>();
@@ -18,7 +27,11 @@ class AppController extends GetxController {
 
   login() async {
     if (authFormKey.currentState!.validate()) {
-      Get.offAllNamed(AppRoutes.home);
+      appService.isLoggedIn.value = true;
+      appService.currentUser.value.firstName = tecs[1].text;
+      appService.currentUser.value.lastName = "";
+      //appService.loginUser("jwt", "refreshJwt")
+      Get.offAll(HomePage());
     } else {
       Ui.showError("Fields not validated");
     }
@@ -26,7 +39,7 @@ class AppController extends GetxController {
 
   submitCart() async {
     Ui.showInfo("Successfully Submitted");
-    Get.offAllNamed(AppRoutes.home);
+    Get.offAll(HomePage());
   }
 
   addToCart(Product pd) {

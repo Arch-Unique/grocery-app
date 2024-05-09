@@ -19,24 +19,25 @@ class _AuthPageState extends State<AuthPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Ui.padding(
-            child: Form(
-              key: controller.authFormKey,
-              child: Column(
-                children: [
-                  CustomTextField("Enter Unique Code", controller.tecs[0]),
-                  CustomTextField("User Name", controller.tecs[1]),
-                  CustomTextField.password("Password", controller.tecs[2]),
-                  Ui.boxHeight(24),
-                  AppButton(
-                      onPressed: () async {
-                        await controller.login();
-                      },
-                      text: "Login"),
-                  Ui.boxHeight(24),
-                ],
-              ),
+        child: Ui.padding(
+          child: Form(
+            key: controller.authFormKey,
+            child: Column(
+              children: [
+                AppText.bold("Grocery Shop",fontSize: 24),
+                AppText.thin("Welcome to grocery shop"),
+                const Spacer(),
+                CustomTextField("Enter Unique Code", controller.tecs[0]),
+                CustomTextField("User Name", controller.tecs[1]),
+                CustomTextField.password("Password", controller.tecs[2]),
+                const Spacer(),
+                AppButton(
+                    onPressed: () async {
+                      await controller.login();
+                    },
+                    text: "Login"),
+                Ui.boxHeight(24),
+              ],
             ),
           ),
         ),
